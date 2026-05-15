@@ -1,766 +1,329 @@
 <!doctype html>
-<html lang="id" class="h-full w-full">
+<html lang="id" class="h-full">
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kuis Administrasi Kepegawaian</title>
-  <script src="/_sdk/element_sdk.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Simulasi Kompetisi CMI 2026</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Playfair+Display:wght@700;800&display=swap');
-
-    html, body {
-      height: 100%;
-      width: 100%;
-      margin: 0;
-    }
-
-    body {
-      font-family: "Plus Jakarta Sans", sans-serif;
-    }
-
-    .soft-grid {
-      background-image:
-        linear-gradient(rgba(17, 24, 39, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(17, 24, 39, 0.05) 1px, transparent 1px),
-        radial-gradient(circle at top left, rgba(15, 118, 110, 0.22), transparent 34%),
-        radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.18), transparent 32%);
-      background-size: 34px 34px, 34px 34px, 100% 100%, 100% 100%;
-    }
-
-    .glass {
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
-
-    .answer-card {
-      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
-    }
-
-    .answer-card:hover {
-      transform: translateY(-2px);
-    }
-
-    .answer-card.selected {
-      box-shadow: 0 14px 34px rgba(15, 118, 110, 0.18);
-    }
-
-    .fade-in {
-      animation: fadeIn 500ms ease both;
-    }
-
-    .slide-up {
-      animation: slideUp 650ms ease both;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .rank-one {
-      background: linear-gradient(135deg, rgba(245, 158, 11, .18), rgba(255, 255, 255, .92));
-    }
-
-    button:focus-visible,
-    input:focus-visible {
-      outline: 3px solid rgba(245, 158, 11, 0.7);
-      outline-offset: 3px;
-    }
-  </style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        html, body { height: 100%; margin: 0; }
+        .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); }
+        .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%); }
+        .card-shadow { box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+        .option-btn { transition: all 0.2s ease; }
+        .option-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(59,130,246,0.2); }
+        .option-btn.selected { background: #2563eb; color: white; border-color: #2563eb; }
+        .option-btn.correct { background: #16a34a; color: white; border-color: #16a34a; }
+        .option-btn.wrong { background: #dc2626; color: white; border-color: #dc2626; }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{ opacity:1 } 50%{ opacity:0.7 } }
+        .fade-in { animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from{ opacity:0; transform:translateY(10px) } to{ opacity:1; transform:translateY(0) } }
+        .progress-bar { transition: width 0.3s ease; }
+    </style>
   <style>body { box-sizing: border-box; }</style>
-  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
- <body class="h-full w-full">
-  <div id="appWrapper" class="h-full w-full overflow-auto soft-grid bg-[#f7f3ea] text-[#17201d]">
-   <header class="w-full px-5 py-5 md:px-8">
-    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4">
-     <div class="flex items-center gap-3">
-      <div id="brandIcon" class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0f766e] text-white shadow-lg shadow-teal-900/15"><i data-lucide="graduation-cap" class="h-6 w-6"></i>
+ <body class="h-full gradient-bg overflow-auto">
+  <div id="app" class="w-full min-h-full flex items-center justify-center p-4">
+   <!-- Login Screen -->
+   <div id="login-screen" class="w-full max-w-md fade-in">
+    <div class="glass rounded-3xl p-8 card-shadow">
+     <div class="text-center mb-6">
+      <img src="https://iili.io/BLzqkYv.jpg" alt="Logo CMI" class="w-24 h-24 mx-auto rounded-2xl object-cover mb-4 shadow-lg" loading="lazy" onerror="this.style.background='#1e3a5f';this.alt='Logo';">
+      <h1 id="main-title" class="text-2xl font-800 text-slate-800">Simulasi Kompetisi CMI 2026</h1>
+      <p class="text-slate-500 text-sm mt-1">Pengetahuan Umum Jenjang SMP/MTs</p>
+     </div>
+     <div class="space-y-4">
+      <div>
+       <label for="nama-input" class="block text-sm font-600 text-slate-700 mb-1">Nama Siswa</label> <input id="nama-input" type="text" placeholder="Masukkan nama lengkap" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none transition">
       </div>
       <div>
-       <p id="miniLabel" class="text-sm font-bold uppercase tracking-[0.25em] text-[#0f766e]">Evaluasi Digital</p>
-       <h1 id="headerTitle" class="font-extrabold leading-tight text-[#17201d]">Kuis Administrasi Kepegawaian</h1>
+       <label for="kelas-input" class="block text-sm font-600 text-slate-700 mb-1">Pilih Kelas</label> <select id="kelas-input" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none transition"> <option value="">-- Pilih Kelas --</option> <option>SMP Kelas VII</option> <option>SMP Kelas VIII</option> <option>SMP Kelas IX</option> <option>MTs Kelas VII</option> <option>MTs Kelas VIII</option> <option>MTs Kelas IX</option> </select>
       </div>
-     </div>
-     <div id="timerPill" class="hidden items-center gap-2 rounded-full border border-[#d8cdb5] bg-white/75 px-4 py-2 font-bold text-[#17201d] shadow-sm glass"><i data-lucide="timer" class="h-5 w-5 text-[#0f766e]"></i> <span id="timerText">00:00</span>
+      <div>
+       <label for="token-input" class="block text-sm font-600 text-slate-700 mb-1">Nomor Token</label> <input id="token-input" type="text" placeholder="Masukkan token akses" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none transition">
+      </div>
+      <p id="login-error" class="text-red-500 text-sm hidden"></p><button id="start-btn" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-700 rounded-xl transition shadow-lg shadow-blue-200"> Mulai Kuis </button>
      </div>
     </div>
-   </header>
-   <main class="w-full px-5 pb-8 md:px-8">
-    <section id="startScreen" class="mx-auto grid max-w-6xl items-center gap-7 py-5 md:grid-cols-[1.05fr_.95fr]">
-     <div class="slide-up">
-      <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-[#d8cdb5] bg-white/70 px-4 py-2 text-sm font-bold text-[#0f766e] shadow-sm glass"><i data-lucide="sparkles" class="h-4 w-4"></i> 15 soal • Bobot 1 per soal • KKM 120
+   </div><!-- Quiz Screen -->
+   <div id="quiz-screen" class="w-full max-w-2xl hidden fade-in">
+    <div class="glass rounded-3xl p-6 md:p-8 card-shadow">
+     <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2">
+       <span class="text-xs font-600 text-slate-500">Soal</span> <span id="q-number" class="text-sm font-800 text-blue-600">1/20</span>
       </div>
-      <h2 id="heroTitle" class="font-black leading-[1.05] tracking-tight text-[#17201d]">Kuis Administrasi Kepegawaian</h2>
-      <p id="heroSubtitle" class="mt-5 max-w-2xl text-lg leading-8 text-[#4b5563]">Masukkan identitas, gunakan token yang benar, lalu kerjakan kuis. Nilai dan ranking akan muncul otomatis setelah selesai.</p>
-      <div class="mt-8 grid gap-4 sm:grid-cols-3">
-       <div class="rounded-3xl border border-[#d8cdb5] bg-white/75 p-5 shadow-sm glass">
-        <p class="text-sm font-bold text-[#4b5563]">Jumlah Soal</p>
-        <p class="mt-1 text-3xl font-black text-[#0f766e]">15</p>
-       </div>
-       <div class="rounded-3xl border border-[#d8cdb5] bg-white/75 p-5 shadow-sm glass">
-        <p class="text-sm font-bold text-[#4b5563]">Nilai Maksimal</p>
-        <p class="mt-1 text-3xl font-black text-[#0f766e]">150</p>
-       </div>
-       <div class="rounded-3xl border border-[#d8cdb5] bg-white/75 p-5 shadow-sm glass">
-        <p class="text-sm font-bold text-[#4b5563]">Ketuntasan</p>
-        <p class="mt-1 text-3xl font-black text-[#0f766e]">120</p>
-       </div>
+      <div class="flex items-center gap-2 bg-red-50 px-3 py-1.5 rounded-full">
+       <i data-lucide="clock" class="w-4 h-4 text-red-500"></i> <span id="timer" class="text-sm font-700 text-red-600">00:00</span>
       </div>
      </div>
-     <div class="slide-up rounded-[2rem] border border-[#d8cdb5] bg-white/80 p-6 shadow-2xl shadow-stone-900/10 glass" style="animation-delay:120ms">
-      <div class="mb-6 flex items-center gap-3">
-       <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f59e0b] text-white"><i data-lucide="clipboard-pen" class="h-5 w-5"></i>
-       </div>
-       <div>
-        <h2 id="formHeading" class="text-2xl font-black text-[#17201d]">Identitas Mahasiswa</h2>
-        <p class="text-sm font-semibold text-[#4b5563]">Token kuis: FY78P</p>
-       </div>
-      </div>
-      <form id="studentForm" class="space-y-4">
-       <div><label for="studentName" class="mb-2 block text-sm font-bold text-[#17201d]">Nama Mahasiswa</label> <input id="studentName" type="text" required placeholder="Contoh: Siti Aminah" class="w-full rounded-2xl border border-[#d8cdb5] bg-[#fbfaf6] px-4 py-3 font-semibold text-[#17201d] shadow-inner transition focus:border-[#0f766e]">
-       </div>
-       <div><label for="quizToken" class="mb-2 block text-sm font-bold text-[#17201d]">Token</label> <input id="quizToken" type="text" required placeholder="Masukkan token" class="w-full rounded-2xl border border-[#d8cdb5] bg-[#fbfaf6] px-4 py-3 font-semibold uppercase tracking-widest text-[#17201d] shadow-inner transition focus:border-[#0f766e]">
-       </div>
-       <p id="formMessage" class="hidden rounded-2xl px-4 py-3 text-sm font-bold"></p><button id="startBtn" type="submit" class="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#0f766e] px-5 py-4 font-black text-white shadow-xl shadow-teal-900/20 transition hover:scale-[1.01] hover:bg-[#115e59]"> <i data-lucide="play" class="h-5 w-5"></i> Mulai Kuis </button>
-      </form>
+     <div class="w-full bg-slate-200 rounded-full h-2 mb-6">
+      <div id="progress-bar" class="bg-blue-600 h-2 rounded-full progress-bar" style="width:5%"></div>
      </div>
-    </section>
-    <section id="quizScreen" class="mx-auto hidden max-w-5xl py-4">
-     <div class="mb-5 overflow-hidden rounded-full bg-white/75 shadow-sm">
-      <div id="progressBar" class="h-3 rounded-full bg-[#0f766e] transition-all" style="width: 0%"></div>
+     <div id="q-category" class="inline-block px-3 py-1 rounded-full text-xs font-600 mb-3 bg-emerald-100 text-emerald-700">
+      IPA
      </div>
-     <div class="rounded-[2rem] border border-[#d8cdb5] bg-white/88 p-6 shadow-2xl shadow-stone-900/10 glass md:p-8">
-      <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
-       <div>
-        <p id="questionCounter" class="text-sm font-black uppercase tracking-[0.22em] text-[#0f766e]">Soal 1 dari 15</p>
-        <h2 id="questionText" class="mt-3 text-2xl font-black leading-snug text-[#17201d] md:text-3xl"></h2>
-       </div>
-       <div class="rounded-2xl bg-[#f7f3ea] px-4 py-3 text-sm font-extrabold text-[#17201d]"><span id="answeredCount">0</span>/15 dijawab
-       </div>
-      </div>
-      <div id="answersWrap" class="grid gap-3"></div>
-      <div class="mt-8 flex flex-col-reverse justify-between gap-3 sm:flex-row"><button id="prevBtn" type="button" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#d8cdb5] bg-white px-5 py-3 font-black text-[#17201d] transition hover:bg-[#f7f3ea]"> <i data-lucide="arrow-left" class="h-5 w-5"></i> Sebelumnya </button> <button id="nextBtn" type="button" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#0f766e] px-5 py-3 font-black text-white shadow-lg shadow-teal-900/15 transition hover:bg-[#115e59]"> Berikutnya <i data-lucide="arrow-right" class="h-5 w-5"></i> </button>
-      </div>
-      <p id="quizMessage" class="mt-5 hidden rounded-2xl bg-amber-100 px-4 py-3 text-sm font-bold text-amber-900"></p>
-     </div>
-    </section>
-    <section id="resultScreen" class="mx-auto hidden max-w-6xl py-4">
-     <div class="grid gap-6 lg:grid-cols-[.85fr_1.15fr]">
-      <div class="rounded-[2rem] border border-[#d8cdb5] bg-white/88 p-6 shadow-2xl shadow-stone-900/10 glass">
-       <div class="flex items-center gap-3">
-        <div id="resultIcon" class="flex h-14 w-14 items-center justify-center rounded-3xl bg-[#0f766e] text-white"><i data-lucide="trophy" class="h-7 w-7"></i>
-        </div>
-        <div>
-         <p class="text-sm font-black uppercase tracking-[0.22em] text-[#0f766e]">Hasil Akhir</p>
-         <h2 id="resultName" class="text-2xl font-black text-[#17201d]">Mahasiswa</h2>
-        </div>
-       </div>
-       <div class="mt-6 rounded-[1.5rem] bg-[#17201d] p-6 text-white">
-        <p class="text-sm font-bold text-white/70">Nilai Akhir</p>
-        <p id="finalScore" class="mt-1 text-6xl font-black">0</p>
-        <p id="passStatus" class="mt-3 inline-flex rounded-full px-4 py-2 text-sm font-black"></p>
-       </div>
-       <div class="mt-5 grid grid-cols-2 gap-3">
-        <div class="rounded-3xl bg-[#f7f3ea] p-4">
-         <p class="text-sm font-bold text-[#4b5563]">Benar</p>
-         <p id="correctTotal" class="text-3xl font-black text-[#0f766e]">0</p>
-        </div>
-        <div class="rounded-3xl bg-[#f7f3ea] p-4">
-         <p class="text-sm font-bold text-[#4b5563]">Salah</p>
-         <p id="wrongTotal" class="text-3xl font-black text-red-600">0</p>
-        </div>
-        <div class="col-span-2 rounded-3xl bg-[#f7f3ea] p-4">
-         <p class="text-sm font-bold text-[#4b5563]">Waktu Pengerjaan</p>
-         <p id="timeTotal" class="text-3xl font-black text-[#17201d]">00:00</p>
-        </div>
-       </div><button id="restartBtn" type="button" class="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#f59e0b] px-5 py-4 font-black text-white shadow-xl shadow-amber-900/20 transition hover:scale-[1.01] hover:bg-[#d97706]"> <i data-lucide="rotate-ccw" class="h-5 w-5"></i> Kerjakan Lagi </button>
-      </div>
-      <div class="rounded-[2rem] border border-[#d8cdb5] bg-white/88 p-6 shadow-2xl shadow-stone-900/10 glass">
-       <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div>
-         <p class="text-sm font-black uppercase tracking-[0.22em] text-[#0f766e]">Ranking Otomatis</p>
-         <h2 class="text-2xl font-black text-[#17201d]">Daftar Nilai Mahasiswa</h2>
-        </div>
-        <div class="rounded-full bg-[#f7f3ea] px-4 py-2 text-sm font-extrabold text-[#17201d]">
-         Skor tertinggi + waktu tercepat
-        </div>
-       </div>
-       <div class="overflow-auto rounded-3xl border border-[#d8cdb5]">
-        <table class="w-full min-w-[880px] border-collapse bg-white text-left">
-         <thead class="bg-[#17201d] text-white">
-          <tr>
-           <th class="px-4 py-4 text-sm font-black">No</th>
-           <th class="px-4 py-4 text-sm font-black">Nama Mahasiswa</th>
-           <th class="px-4 py-4 text-sm font-black">Waktu</th>
-           <th class="px-4 py-4 text-sm font-black">Benar</th>
-           <th class="px-4 py-4 text-sm font-black">Salah</th>
-           <th class="px-4 py-4 text-sm font-black">Nilai Akhir</th>
-           <th class="px-4 py-4 text-sm font-black">Ketuntasan</th>
-          </tr>
-         </thead>
-         <tbody id="scoreTableBody"></tbody>
-        </table>
-       </div>
-      </div>
-     </div>
-    </section>
-   </main>
-   <footer class="w-full px-5 pb-5 md:px-8">
-    <div class="mx-auto max-w-6xl rounded-3xl border border-[#d8cdb5] bg-white/60 px-5 py-4 text-center text-sm font-semibold text-[#4b5563] glass">
-     Sistem nilai: jumlah benar × 10. KKM 120. Ranking diurutkan dari nilai tertinggi, lalu waktu tercepat.
+     <h2 id="q-text" class="text-lg font-700 text-slate-800 mb-6"></h2>
+     <div id="options-container" class="space-y-3"></div>
+     <div id="feedback" class="mt-4 hidden text-center p-3 rounded-xl font-600"></div><button id="next-btn" class="mt-6 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-700 rounded-xl transition hidden"> Soal Berikutnya </button>
     </div>
-   </footer>
+   </div><!-- Result Screen -->
+   <div id="result-screen" class="w-full max-w-4xl hidden fade-in">
+    <div class="glass rounded-3xl p-6 md:p-8 card-shadow">
+     <div class="text-center mb-6">
+      <img src="https://iili.io/BLzqkYv.jpg" alt="Logo CMI" class="w-16 h-16 mx-auto rounded-xl object-cover mb-3" loading="lazy" onerror="this.style.background='#1e3a5f';">
+      <h2 id="result-title" class="text-2xl font-800 text-slate-800">Hasil Kuis</h2>
+     </div>
+     <div id="score-display" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"></div>
+     <h3 class="text-lg font-700 text-slate-800 mb-3">🏆 Daftar Ranking Nilai Siswa</h3>
+     <div class="overflow-x-auto rounded-xl border border-slate-200">
+      <table class="w-full text-sm">
+       <thead class="bg-slate-800 text-white">
+        <tr>
+         <th class="px-3 py-2 text-left">No</th>
+         <th class="px-3 py-2 text-left">Nama</th>
+         <th class="px-3 py-2 text-left">Kelas</th>
+         <th class="px-3 py-2 text-center">Waktu</th>
+         <th class="px-3 py-2 text-center">Benar</th>
+         <th class="px-3 py-2 text-center">Salah</th>
+         <th class="px-3 py-2 text-center">Nilai</th>
+         <th class="px-3 py-2 text-center">Keterangan</th>
+        </tr>
+       </thead>
+       <tbody id="ranking-body"></tbody>
+      </table>
+     </div><button id="retry-btn" class="mt-6 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-700 rounded-xl transition"> Kembali ke Login </button>
+    </div>
+   </div>
   </div>
   <script>
-    const defaultConfig = {
-      quiz_title: "Kuis Administrasi Kepegawaian",
-      quiz_subtitle: "Masukkan identitas, gunakan token yang benar, lalu kerjakan kuis. Nilai dan ranking akan muncul otomatis setelah selesai.",
-      start_button_text: "Mulai Kuis",
-      finish_button_text: "Selesai & Lihat Nilai",
-      background_color: "#f7f3ea",
-      surface_color: "#ffffff",
-      text_color: "#17201d",
-      primary_color: "#0f766e",
-      secondary_color: "#f59e0b",
-      font_family: "Plus Jakarta Sans",
-      font_size: 16
-    };
+        const defaultConfig = {
+            main_title: 'Simulasi Kompetisi CMI 2026',
+            token_code: 'FT65V',
+            background_color: '#0f172a',
+            surface_color: '#ffffff',
+            text_color: '#1e293b',
+            primary_action: '#2563eb',
+            secondary_action: '#64748b'
+        };
 
-    const questions = [
-      {
-        question: "Administrasi kepegawaian dalam konteks pendidikan adalah …",
-        options: [
-          "Proses pengelolaan sarana dan prasarana sekolah",
-          "Proses pengelolaan data dan dokumen pendidik secara sistematis",
-          "Kegiatan pembelajaran di dalam kelas",
-          "Penyusunan kurikulum sekolah"
-        ],
-        answer: 1
-      },
-      {
-        question: "Tujuan utama administrasi kepegawaian adalah …",
-        options: [
-          "Mengurangi jumlah tenaga kependidikan",
-          "Menjamin kenaikan pangkat otomatis",
-          "Meningkatkan efisiensi pengelolaan SDM",
-          "Menghapus sistem evaluasi guru"
-        ],
-        answer: 2
-      },
-      {
-        question: "Tahap pertama dalam siklus administrasi kepegawaian adalah …",
-        options: ["Evaluasi", "Monitoring", "Perencanaan", "Pelaporan"],
-        answer: 2
-      },
-      {
-        question: "Kegiatan yang termasuk tahap pelaksanaan administrasi kepegawaian adalah …",
-        options: [
-          "Menentukan SOP",
-          "Menyusun kebutuhan SDM",
-          "Mengelola dokumen kepegawaian",
-          "Menetapkan standar evaluasi"
-        ],
-        answer: 2
-      },
-      {
-        question: "Monitoring proses administrasi secara berkala merupakan bagian dari tahap …",
-        options: ["Pelaksanaan", "Evaluasi", "Perencanaan", "Pengorganisasian"],
-        answer: 1
-      },
-      {
-        question: "Fungsi utama daftar hadir guru adalah …",
-        options: [
-          "Menentukan kurikulum sekolah",
-          "Menilai hasil belajar siswa",
-          "Monitoring kedisiplinan guru",
-          "Menentukan jadwal ujian"
-        ],
-        answer: 2
-      },
-      {
-        question: "Salah satu komponen penting dalam format daftar hadir guru adalah …",
-        options: ["Nilai siswa", "Jam masuk", "Jadwal piket siswa", "Data wali murid"],
-        answer: 1
-      },
-      {
-        question: "Penggunaan fingerprint dalam absensi guru bertujuan untuk …",
-        options: [
-          "Mengurangi jumlah guru",
-          "Mempermudah dan meningkatkan akurasi pencatatan",
-          "Menghapus laporan kehadiran",
-          "Menggantikan kepala sekolah"
-        ],
-        answer: 1
-      },
-      {
-        question: "Laporan keadaan guru digunakan sebagai dasar untuk …",
-        options: [
-          "Penjualan aset sekolah",
-          "Pengambilan keputusan strategis SDM pendidikan",
-          "Penyusunan jadwal pelajaran siswa",
-          "Penilaian gedung sekolah"
-        ],
-        answer: 1
-      },
-      {
-        question: "Berikut yang termasuk isi laporan keadaan guru adalah …",
-        options: [
-          "Data absensi dan catatan kinerja",
-          "Daftar harga buku",
-          "Jadwal ekstrakurikuler",
-          "Data alumni sekolah"
-        ],
-        answer: 0
-      },
-      {
-        question: "Daftar kepangkatan guru berfungsi sebagai acuan untuk …",
-        options: [
-          "Promosi dan pengembangan karir guru",
-          "Penentuan nilai siswa",
-          "Pengadaan sarana sekolah",
-          "Penjualan buku pelajaran"
-        ],
-        answer: 0
-      },
-      {
-        question: "Informasi yang dicantumkan dalam daftar kepangkatan guru meliputi …",
-        options: [
-          "Nilai rapor siswa",
-          "Pangkat/golongan guru",
-          "Jadwal piket kelas",
-          "Data komite sekolah"
-        ],
-        answer: 1
-      },
-      {
-        question: "Verifikasi dan validasi data kepangkatan dilakukan untuk …",
-        options: [
-          "Mengurangi jumlah dokumen",
-          "Memastikan kebenaran informasi",
-          "Menambah beban administrasi",
-          "Menghapus data lama"
-        ],
-        answer: 1
-      },
-      {
-        question: "Pengelolaan cuti dan izin termasuk aspek administrasi kepegawaian yang berkaitan dengan …",
-        options: [
-          "Rekrutmen siswa",
-          "Administrasi personalia",
-          "Pengelolaan laboratorium",
-          "Penyusunan kurikulum"
-        ],
-        answer: 1
-      },
-      {
-        question: "SIMPEG dalam administrasi kepegawaian digunakan untuk …",
-        options: [
-          "Mengolah nilai siswa",
-          "Mengelola data kepegawaian secara terpusat",
-          "Membuat jadwal piket siswa",
-          "Menentukan harga buku sekolah"
-        ],
-        answer: 1
-      }
-    ];
-
-    let currentQuestion = 0;
-    let answers = Array(questions.length).fill(null);
-    let student = { name: "", className: "" };
-    let startTime = null;
-    let timerInterval = null;
-    let elapsedSeconds = 0;
-    let scoreRecords = [];
-    let isTokenValid = false;
-
-    const appWrapper = document.getElementById("appWrapper");
-    const headerTitle = document.getElementById("headerTitle");
-    const heroTitle = document.getElementById("heroTitle");
-    const heroSubtitle = document.getElementById("heroSubtitle");
-    const startBtn = document.getElementById("startBtn");
-    const nextBtn = document.getElementById("nextBtn");
-
-    function formatTime(seconds) {
-      const mins = Math.floor(seconds / 60).toString().padStart(2, "0");
-      const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
-      return `${mins}:${secs}`;
-    }
-
-    function showMessage(element, text, type) {
-      element.textContent = text;
-      element.classList.remove("hidden", "bg-red-100", "text-red-800", "bg-emerald-100", "text-emerald-800");
-      if (type === "error") {
-        element.classList.add("bg-red-100", "text-red-800");
-      } else {
-        element.classList.add("bg-emerald-100", "text-emerald-800");
-      }
-    }
-
-    function startTimer() {
-      startTime = Date.now();
-      elapsedSeconds = 0;
-      document.getElementById("timerPill").classList.remove("hidden");
-      document.getElementById("timerPill").classList.add("flex");
-      document.getElementById("timerText").textContent = "00:00";
-      timerInterval = setInterval(() => {
-        elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-        document.getElementById("timerText").textContent = formatTime(elapsedSeconds);
-      }, 1000);
-    }
-
-    function stopTimer() {
-      if (timerInterval) clearInterval(timerInterval);
-      elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-      document.getElementById("timerText").textContent = formatTime(elapsedSeconds);
-    }
-
-    function renderQuestion() {
-      const q = questions[currentQuestion];
-      document.getElementById("questionCounter").textContent = `Soal ${currentQuestion + 1} dari ${questions.length}`;
-      document.getElementById("questionText").textContent = q.question;
-      document.getElementById("answeredCount").textContent = answers.filter(a => a !== null).length;
-      document.getElementById("progressBar").style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
-
-      const answersWrap = document.getElementById("answersWrap");
-      answersWrap.innerHTML = "";
-
-      q.options.forEach((option, index) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "answer-card flex w-full items-start gap-4 rounded-3xl border border-[#d8cdb5] bg-[#fbfaf6] p-4 text-left font-bold text-[#17201d] hover:border-[#0f766e] hover:bg-white";
-        if (answers[currentQuestion] === index) {
-          button.classList.add("selected");
-          button.style.borderColor = getConfigValue("primary_color");
-          button.style.backgroundColor = "rgba(15, 118, 110, 0.09)";
-        }
-
-        const letter = document.createElement("span");
-        letter.className = "flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[#0f766e] text-sm font-black text-white";
-        letter.textContent = String.fromCharCode(65 + index);
-
-        const text = document.createElement("span");
-        text.className = "pt-1 leading-7";
-        text.textContent = option;
-
-        button.appendChild(letter);
-        button.appendChild(text);
-        button.addEventListener("click", () => {
-          answers[currentQuestion] = index;
-          document.getElementById("quizMessage").classList.add("hidden");
-          renderQuestion();
-        });
-
-        answersWrap.appendChild(button);
-      });
-
-      document.getElementById("prevBtn").disabled = currentQuestion === 0;
-      document.getElementById("prevBtn").style.opacity = currentQuestion === 0 ? "0.45" : "1";
-
-      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
-      nextBtn.innerHTML = currentQuestion === questions.length - 1
-        ? `<i data-lucide="check-circle" class="h-5 w-5"></i> ${config.finish_button_text || defaultConfig.finish_button_text}`
-        : `Berikutnya <i data-lucide="arrow-right" class="h-5 w-5"></i>`;
-
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function finishQuiz() {
-      if (answers.some(a => a === null)) {
-        const unanswered = answers.findIndex(a => a === null) + 1;
-        const quizMessage = document.getElementById("quizMessage");
-        quizMessage.textContent = `Masih ada soal yang belum dijawab. Silakan lengkapi soal nomor ${unanswered}.`;
-        quizMessage.classList.remove("hidden");
-        currentQuestion = unanswered - 1;
-        renderQuestion();
-        return;
-      }
-
-      stopTimer();
-
-      const correct = answers.reduce((total, answer, index) => total + (answer === questions[index].answer ? 1 : 0), 0);
-      const wrong = questions.length - correct;
-      const finalScore = correct * 10;
-      const isPassed = finalScore >= 120;
-
-      const record = {
-        name: student.name,
-        className: student.className,
-        timestamp: new Date(),
-        timeSeconds: elapsedSeconds,
-        correct,
-        wrong,
-        finalScore,
-        isPassed
-      };
-
-      scoreRecords.push(record);
-      scoreRecords.sort((a, b) => {
-        if (b.finalScore !== a.finalScore) return b.finalScore - a.finalScore;
-        return a.timeSeconds - b.timeSeconds;
-      });
-
-      document.getElementById("quizScreen").classList.add("hidden");
-      document.getElementById("resultScreen").classList.remove("hidden");
-      document.getElementById("resultScreen").classList.add("fade-in");
-
-      document.getElementById("resultName").textContent = student.name;
-      document.getElementById("finalScore").textContent = finalScore;
-      document.getElementById("correctTotal").textContent = correct;
-      document.getElementById("wrongTotal").textContent = wrong;
-      document.getElementById("timeTotal").textContent = formatTime(elapsedSeconds);
-
-      const passStatus = document.getElementById("passStatus");
-      passStatus.textContent = isPassed ? "Lulus" : "Tidak Lulus";
-      passStatus.className = "mt-3 inline-flex rounded-full px-4 py-2 text-sm font-black";
-      passStatus.classList.add(isPassed ? "bg-emerald-400" : "bg-red-500", "text-white");
-
-      renderScoreTable();
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function renderScoreTable() {
-      const body = document.getElementById("scoreTableBody");
-      body.innerHTML = "";
-
-      scoreRecords.forEach((record, index) => {
-        const row = document.createElement("tr");
-        row.className = index === 0 ? "rank-one border-b border-[#d8cdb5]" : "border-b border-[#d8cdb5]";
-
-        const formattedDate = record.timestamp.toLocaleString("id-ID", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit"
-        });
-
-        const cells = [
-          index + 1,
-          record.name,
-          `${formattedDate} • ${formatTime(record.timeSeconds)}`,
-          record.correct,
-          record.wrong,
-          record.finalScore
+        let allRecords = [];
+        const questions = [
+            {q:"Planet terbesar dalam tata surya adalah …",o:["Bumi","Mars","Jupiter","Venus"],a:2,cat:"IPA"},
+            {q:"Organ tubuh manusia yang berfungsi memompa darah adalah …",o:["Paru-paru","Jantung","Hati","Ginjal"],a:1,cat:"IPA"},
+            {q:"Perubahan wujud benda dari cair menjadi gas disebut …",o:["Membeku","Mengembun","Menguap","Mencair"],a:2,cat:"IPA"},
+            {q:"Hewan yang berkembang biak dengan cara bertelur disebut …",o:["Vivipar","Ovipar","Ovovivipar","Mamalia"],a:1,cat:"IPA"},
+            {q:"Sumber energi utama bagi kehidupan di bumi adalah …",o:["Air","Angin","Matahari","Batu bara"],a:2,cat:"IPA"},
+            {q:"Bagian tumbuhan yang berfungsi menyerap air dan mineral adalah …",o:["Daun","Batang","Bunga","Akar"],a:3,cat:"IPA"},
+            {q:"Gaya tarik bumi terhadap suatu benda disebut …",o:["Magnet","Gravitasi","Gesek","Pegas"],a:1,cat:"IPA"},
+            {q:"Zat hijau daun yang membantu proses fotosintesis disebut …",o:["Hemoglobin","Kloroplas","Klorofil","Plasma"],a:2,cat:"IPA"},
+            {q:"Contoh hewan herbivora adalah …",o:["Harimau","Sapi","Elang","Buaya"],a:1,cat:"IPA"},
+            {q:"Lapisan atmosfer yang melindungi bumi dari sinar ultraviolet adalah …",o:["Troposfer","Stratosfer","Mesosfer","Termosfer"],a:1,cat:"IPA"},
+            {q:"Alat untuk mengukur suhu adalah …",o:["Neraca","Barometer","Termometer","Higrometer"],a:2,cat:"IPA"},
+            {q:"Campuran antara air dan minyak termasuk campuran …",o:["Homogen","Heterogen","Larutan","Senyawa"],a:1,cat:"IPA"},
+            {q:"Planet yang dikenal sebagai planet merah adalah …",o:["Saturnus","Uranus","Mars","Merkurius"],a:2,cat:"IPA"},
+            {q:"Ibu kota negara Indonesia adalah …",o:["Bandung","Surabaya","Jakarta","Medan"],a:2,cat:"IPS"},
+            {q:"Benua terbesar di dunia adalah …",o:["Afrika","Asia","Eropa","Amerika"],a:1,cat:"IPS"},
+            {q:"Tokoh proklamator Indonesia adalah …",o:["Ki Hajar Dewantara dan Soedirman","Soekarno dan Mohammad Hatta","Ahmad Dahlan dan HOS Cokroaminoto","Sultan Hasanuddin dan Diponegoro"],a:1,cat:"IPS"},
+            {q:"ASEAN merupakan organisasi negara-negara di kawasan …",o:["Asia Selatan","Asia Timur","Asia Tenggara","Timur Tengah"],a:2,cat:"IPS"},
+            {q:"Mata uang negara Jepang adalah …",o:["Won","Ringgit","Yen","Dolar"],a:2,cat:"IPS"},
+            {q:"Sungai terpanjang di dunia adalah …",o:["Sungai Nil","Sungai Amazon","Sungai Musi","Sungai Gangga"],a:0,cat:"IPS"},
+            {q:"Pahlawan wanita Indonesia yang terkenal memperjuangkan emansipasi wanita adalah …",o:["Dewi Sartika","Cut Nyak Dien","Martha Christina Tiahahu","RA Kartini"],a:3,cat:"IPS"}
         ];
 
-        cells.forEach((cell, cellIndex) => {
-          const td = document.createElement("td");
-          td.className = "px-4 py-4 text-sm font-bold text-[#17201d]";
-          if (cellIndex === 0) {
-            td.innerHTML = index === 0 ? `🏆 ${cell}` : cell;
-          } else {
-            td.textContent = cell;
-          }
-          row.appendChild(td);
+        let currentQ = 0, score = 0, answered = false, timerInterval, seconds = 0;
+        let studentName = '', studentClass = '';
+
+        // Timer
+        function startTimer() {
+            seconds = 0;
+            timerInterval = setInterval(() => {
+                seconds++;
+                const m = String(Math.floor(seconds/60)).padStart(2,'0');
+                const s = String(seconds%60).padStart(2,'0');
+                document.getElementById('timer').textContent = `${m}:${s}`;
+            }, 1000);
+        }
+        function stopTimer() { clearInterval(timerInterval); }
+        function formatTime(sec) {
+            return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
+        }
+
+        // Login
+        document.getElementById('start-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            const nama = document.getElementById('nama-input').value.trim();
+            const kelas = document.getElementById('kelas-input').value;
+            const token = document.getElementById('token-input').value.trim();
+            const errEl = document.getElementById('login-error');
+
+            if (!nama || !kelas || !token) {
+                errEl.textContent = 'Semua field harus diisi!'; errEl.classList.remove('hidden'); return;
+            }
+            const validToken = window.elementSdk?.config?.token_code || defaultConfig.token_code;
+            if (token !== validToken) {
+                errEl.textContent = 'Token tidak valid!'; errEl.classList.remove('hidden'); return;
+            }
+            errEl.classList.add('hidden');
+            studentName = nama; studentClass = kelas;
+            currentQ = 0; score = 0;
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            startTimer();
+            renderQuestion();
         });
 
-        const statusTd = document.createElement("td");
-        statusTd.className = "px-4 py-4";
-        const badge = document.createElement("span");
-        badge.className = record.isPassed
-          ? "inline-flex rounded-full bg-emerald-500 px-3 py-1 text-xs font-black text-white"
-          : "inline-flex rounded-full bg-red-500 px-3 py-1 text-xs font-black text-white";
-        badge.textContent = record.isPassed ? "Lulus" : "Tidak Lulus";
-        statusTd.appendChild(badge);
-        row.appendChild(statusTd);
+        function renderQuestion() {
+            answered = false;
+            const q = questions[currentQ];
+            document.getElementById('q-number').textContent = `${currentQ+1}/20`;
+            document.getElementById('progress-bar').style.width = `${((currentQ+1)/20)*100}%`;
+            document.getElementById('q-category').textContent = q.cat;
+            document.getElementById('q-category').className = q.cat === 'IPA' ? 'inline-block px-3 py-1 rounded-full text-xs font-600 mb-3 bg-emerald-100 text-emerald-700' : 'inline-block px-3 py-1 rounded-full text-xs font-600 mb-3 bg-amber-100 text-amber-700';
+            document.getElementById('q-text').textContent = `${currentQ+1}. ${q.q}`;
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
 
-        body.appendChild(row);
-      });
-    }
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            const labels = ['A','B','C','D'];
+            q.o.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn w-full text-left px-4 py-3 rounded-xl border-2 border-slate-200 font-500 text-slate-700 hover:border-blue-400';
+                btn.innerHTML = `<span class="font-700 text-blue-600 mr-2">${labels[i]}.</span> ${opt}`;
+                btn.onclick = () => selectAnswer(i);
+                container.appendChild(btn);
+            });
+        }
 
-    function resetQuiz() {
-      currentQuestion = 0;
-      answers = Array(questions.length).fill(null);
-      student = { name: "" };
-      startTime = null;
-      elapsedSeconds = 0;
-      document.getElementById("studentName").value = "";
-      document.getElementById("quizToken").value = "";
-      document.getElementById("formMessage").classList.add("hidden");
-      document.getElementById("resultScreen").classList.add("hidden");
-      document.getElementById("startScreen").classList.remove("hidden");
-      document.getElementById("timerPill").classList.add("hidden");
-      document.getElementById("timerPill").classList.remove("flex");
-      if (timerInterval) clearInterval(timerInterval);
-    }
+        function selectAnswer(idx) {
+            if (answered) return;
+            answered = true;
+            const q = questions[currentQ];
+            const btns = document.querySelectorAll('.option-btn');
+            const fb = document.getElementById('feedback');
 
-    function getConfigValue(key) {
-      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
-      return config[key] || defaultConfig[key];
-    }
-
-    document.getElementById("studentForm").addEventListener("submit", (event) => {
-      event.preventDefault();
-
-      const name = document.getElementById("studentName").value.trim();
-      const token = document.getElementById("quizToken").value.trim().toUpperCase();
-      const formMessage = document.getElementById("formMessage");
-
-      if (!name || !token) {
-        showMessage(formMessage, "Lengkapi nama dan token terlebih dahulu.", "error");
-        return;
-      }
-
-      if (token !== "FY78P") {
-        showMessage(formMessage, "Token belum sesuai. Periksa kembali token kuis.", "error");
-        return;
-      }
-
-      student = { name };
-      document.getElementById("startScreen").classList.add("hidden");
-      document.getElementById("quizScreen").classList.remove("hidden");
-      document.getElementById("quizScreen").classList.add("fade-in");
-      startTimer();
-      renderQuestion();
-    });
-
-    document.getElementById("prevBtn").addEventListener("click", () => {
-      if (currentQuestion > 0) {
-        currentQuestion--;
-        renderQuestion();
-      }
-    });
-
-    document.getElementById("nextBtn").addEventListener("click", () => {
-      if (answers[currentQuestion] === null) {
-        const quizMessage = document.getElementById("quizMessage");
-        quizMessage.textContent = "Pilih salah satu jawaban sebelum lanjut.";
-        quizMessage.classList.remove("hidden");
-        return;
-      }
-
-      document.getElementById("quizMessage").classList.add("hidden");
-
-      if (currentQuestion < questions.length - 1) {
-        currentQuestion++;
-        renderQuestion();
-      } else {
-        finishQuiz();
-      }
-    });
-
-    document.getElementById("restartBtn").addEventListener("click", resetQuiz);
-
-    async function onConfigChange(config) {
-      const background = config.background_color || defaultConfig.background_color;
-      const surface = config.surface_color || defaultConfig.surface_color;
-      const text = config.text_color || defaultConfig.text_color;
-      const primary = config.primary_color || defaultConfig.primary_color;
-      const secondary = config.secondary_color || defaultConfig.secondary_color;
-      const fontFamily = config.font_family || defaultConfig.font_family;
-      const fontSize = Number(config.font_size || defaultConfig.font_size);
-      const fontStack = `${fontFamily}, "Plus Jakarta Sans", sans-serif`;
-
-      appWrapper.style.backgroundColor = background;
-      appWrapper.style.color = text;
-      appWrapper.style.fontFamily = fontStack;
-
-      document.querySelectorAll("h1, h2, h3, p, label, input, button, td, th, span").forEach(el => {
-        el.style.fontFamily = fontStack;
-      });
-
-      headerTitle.textContent = config.quiz_title || defaultConfig.quiz_title;
-      heroTitle.textContent = config.quiz_title || defaultConfig.quiz_title;
-      heroSubtitle.textContent = config.quiz_subtitle || defaultConfig.quiz_subtitle;
-      startBtn.innerHTML = `<i data-lucide="play" class="h-5 w-5"></i> ${config.start_button_text || defaultConfig.start_button_text}`;
-
-      headerTitle.style.fontSize = `${fontSize * 1.15}px`;
-      heroTitle.style.fontSize = `${fontSize * 3.2}px`;
-      heroSubtitle.style.fontSize = `${fontSize * 1.08}px`;
-      document.getElementById("formHeading").style.fontSize = `${fontSize * 1.5}px`;
-      document.getElementById("questionText").style.fontSize = `${fontSize * 1.75}px`;
-
-      document.querySelectorAll(".bg-\\[\\#0f766e\\]").forEach(el => {
-        el.style.backgroundColor = primary;
-      });
-
-      document.querySelectorAll(".text-\\[\\#0f766e\\]").forEach(el => {
-        el.style.color = primary;
-      });
-
-      document.querySelectorAll(".bg-\\[\\#f59e0b\\]").forEach(el => {
-        el.style.backgroundColor = secondary;
-      });
-
-      document.querySelectorAll(".text-\\[\\#17201d\\]").forEach(el => {
-        el.style.color = text;
-      });
-
-      document.querySelectorAll(".bg-white\\/80, .bg-white\\/88, .bg-white\\/75, .bg-white\\/70, .bg-white\\/60").forEach(el => {
-        el.style.backgroundColor = `${surface}dd`;
-      });
-
-      startBtn.style.backgroundColor = primary;
-      nextBtn.style.backgroundColor = primary;
-      document.getElementById("progressBar").style.backgroundColor = primary;
-      document.getElementById("brandIcon").style.backgroundColor = primary;
-      document.getElementById("restartBtn").style.backgroundColor = secondary;
-
-      if (currentQuestion >= 0 && !document.getElementById("quizScreen").classList.contains("hidden")) {
-        renderQuestion();
-      }
-
-      if (window.lucide) lucide.createIcons();
-    }
-
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig,
-        onConfigChange,
-        mapToCapabilities: (config) => ({
-          recolorables: [
-            {
-              get: () => config.background_color || defaultConfig.background_color,
-              set: (value) => window.elementSdk.setConfig({ background_color: value })
-            },
-            {
-              get: () => config.surface_color || defaultConfig.surface_color,
-              set: (value) => window.elementSdk.setConfig({ surface_color: value })
-            },
-            {
-              get: () => config.text_color || defaultConfig.text_color,
-              set: (value) => window.elementSdk.setConfig({ text_color: value })
-            },
-            {
-              get: () => config.primary_color || defaultConfig.primary_color,
-              set: (value) => window.elementSdk.setConfig({ primary_color: value })
-            },
-            {
-              get: () => config.secondary_color || defaultConfig.secondary_color,
-              set: (value) => window.elementSdk.setConfig({ secondary_color: value })
+            btns[q.a].classList.add('correct');
+            if (idx === q.a) {
+                score++;
+                fb.textContent = '✅ Benar!';
+                fb.className = 'mt-4 text-center p-3 rounded-xl font-600 bg-green-100 text-green-700';
+            } else {
+                btns[idx].classList.add('wrong');
+                fb.textContent = '❌ Salah! Jawaban yang benar: ' + ['A','B','C','D'][q.a];
+                fb.className = 'mt-4 text-center p-3 rounded-xl font-600 bg-red-100 text-red-700';
             }
-          ],
-          borderables: [],
-          fontEditable: {
-            get: () => config.font_family || defaultConfig.font_family,
-            set: (value) => window.elementSdk.setConfig({ font_family: value })
-          },
-          fontSizeable: {
-            get: () => config.font_size || defaultConfig.font_size,
-            set: (value) => window.elementSdk.setConfig({ font_size: value })
-          }
-        }),
-        mapToEditPanelValues: (config) => new Map([
-          ["quiz_title", config.quiz_title || defaultConfig.quiz_title],
-          ["quiz_subtitle", config.quiz_subtitle || defaultConfig.quiz_subtitle],
-          ["start_button_text", config.start_button_text || defaultConfig.start_button_text],
-          ["finish_button_text", config.finish_button_text || defaultConfig.finish_button_text]
-        ])
-      });
-    } else {
-      onConfigChange(defaultConfig);
-    }
+            fb.classList.remove('hidden');
 
-    if (window.lucide) lucide.createIcons();
-  </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fbfebb1b3c5ce16',t:'MTc3ODgyNDgwOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+            if (currentQ < 19) {
+                document.getElementById('next-btn').classList.remove('hidden');
+            } else {
+                const finBtn = document.getElementById('next-btn');
+                finBtn.textContent = 'Lihat Hasil';
+                finBtn.classList.remove('hidden');
+            }
+        }
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (currentQ < 19) { currentQ++; renderQuestion(); }
+            else { finishQuiz(); }
+        });
+
+        async function finishQuiz() {
+            stopTimer();
+            const nilaiAkhir = (score / 20) * 100;
+            const keterangan = nilaiAkhir >= 75 ? 'Lulus' : 'Tidak Lulus';
+            const waktuStr = formatTime(seconds);
+
+            // Save
+            if (allRecords.length < 999) {
+                await window.dataSdk.create({
+                    nama: studentName, kelas: studentClass, waktu: waktuStr,
+                    waktu_detik: seconds, jumlah_benar: score, jumlah_salah: 20 - score,
+                    nilai_akhir: nilaiAkhir, keterangan: keterangan, created_at: new Date().toISOString()
+                });
+            }
+
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            // Score display
+            document.getElementById('score-display').innerHTML = `
+                <div class="bg-blue-50 rounded-xl p-4 text-center"><p class="text-xs text-slate-500">Benar</p><p class="text-2xl font-800 text-blue-600">${score}</p></div>
+                <div class="bg-red-50 rounded-xl p-4 text-center"><p class="text-xs text-slate-500">Salah</p><p class="text-2xl font-800 text-red-600">${20-score}</p></div>
+                <div class="bg-emerald-50 rounded-xl p-4 text-center"><p class="text-xs text-slate-500">Nilai</p><p class="text-2xl font-800 text-emerald-600">${nilaiAkhir}</p></div>
+                <div class="bg-purple-50 rounded-xl p-4 text-center"><p class="text-xs text-slate-500">Waktu</p><p class="text-2xl font-800 text-purple-600">${waktuStr}</p></div>
+            `;
+            renderRanking();
+        }
+
+        function renderRanking() {
+            const sorted = [...allRecords].sort((a,b) => b.nilai_akhir - a.nilai_akhir || a.waktu_detik - b.waktu_detik);
+            const tbody = document.getElementById('ranking-body');
+            tbody.innerHTML = sorted.map((r, i) => `
+                <tr class="border-b border-slate-100 ${i%2===0?'bg-white':'bg-slate-50'}">
+                    <td class="px-3 py-2 font-600">${i+1}</td>
+                    <td class="px-3 py-2">${r.nama}</td>
+                    <td class="px-3 py-2">${r.kelas}</td>
+                    <td class="px-3 py-2 text-center">${r.waktu}</td>
+                    <td class="px-3 py-2 text-center font-600 text-green-600">${r.jumlah_benar}</td>
+                    <td class="px-3 py-2 text-center font-600 text-red-600">${r.jumlah_salah}</td>
+                    <td class="px-3 py-2 text-center font-800">${r.nilai_akhir}</td>
+                    <td class="px-3 py-2 text-center"><span class="px-2 py-1 rounded-full text-xs font-700 ${r.nilai_akhir>=75?'bg-green-100 text-green-700':'bg-red-100 text-red-700'}">${r.keterangan}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('retry-btn').addEventListener('click', () => {
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('nama-input').value = '';
+            document.getElementById('kelas-input').value = '';
+            document.getElementById('token-input').value = '';
+            document.getElementById('next-btn').textContent = 'Soal Berikutnya';
+        });
+
+        // Data SDK
+        const dataHandler = {
+            onDataChanged(data) {
+                allRecords = data;
+                if (!document.getElementById('result-screen').classList.contains('hidden')) renderRanking();
+            }
+        };
+
+        // Element SDK
+        window.elementSdk.init({
+            defaultConfig,
+            onConfigChange: async (config) => {
+                const title = config.main_title || defaultConfig.main_title;
+                document.getElementById('main-title').textContent = title;
+                document.getElementById('result-title').textContent = 'Hasil - ' + title;
+            },
+            mapToCapabilities: (config) => ({
+                recolorables: [
+                    { get: () => config.background_color || defaultConfig.background_color, set: v => { config.background_color = v; window.elementSdk.setConfig({background_color:v}); }},
+                    { get: () => config.surface_color || defaultConfig.surface_color, set: v => { config.surface_color = v; window.elementSdk.setConfig({surface_color:v}); }},
+                    { get: () => config.text_color || defaultConfig.text_color, set: v => { config.text_color = v; window.elementSdk.setConfig({text_color:v}); }},
+                    { get: () => config.primary_action || defaultConfig.primary_action, set: v => { config.primary_action = v; window.elementSdk.setConfig({primary_action:v}); }},
+                    { get: () => config.secondary_action || defaultConfig.secondary_action, set: v => { config.secondary_action = v; window.elementSdk.setConfig({secondary_action:v}); }}
+                ],
+                borderables: [],
+                fontEditable: undefined,
+                fontSizeable: undefined
+            }),
+            mapToEditPanelValues: (config) => new Map([
+                ['main_title', config.main_title || defaultConfig.main_title],
+                ['token_code', config.token_code || defaultConfig.token_code]
+            ])
+        });
+
+        window.dataSdk.init(dataHandler);
+        lucide.createIcons();
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fc1ddf7b630fe13',t:'MTc3ODg0NTIxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
